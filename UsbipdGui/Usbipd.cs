@@ -98,7 +98,8 @@ namespace UsbipdGui
 
         public bool Bind(ref UsbDevice device)
         {
-            if (ExecuteCommand("usbpid", $"bind -f -b {device.BusId}") is null)
+            Debug.WriteLine($"bind -f -b {device.BusId}");
+            if (ExecuteCommand("usbipd", $"bind -f -b {device.BusId}") is null)
             {
                 return false;
             }
@@ -123,7 +124,7 @@ namespace UsbipdGui
 
         public bool Unbind(ref UsbDevice device)
         {
-            if (ExecuteCommand("usbpid", $"unbind -b {device.BusId}") is null)
+            if (ExecuteCommand("usbipd", $"unbind -b {device.BusId}") is null)
             {
                 return false;
             }

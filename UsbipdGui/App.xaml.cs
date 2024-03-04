@@ -106,12 +106,20 @@ namespace UsbipdGui
         {
             UsbDevice device = (UsbDevice)((ToolStripMenuItem)sender).Tag;
             System.Diagnostics.Debug.WriteLine($"usbipd bind {device.BusId}");
+            if (!_usbipd.Bind(ref device))
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to bind {device.BusId}");
+            }
         }
 
         private void ClickUnbindedDevice(object? sender, EventArgs e)
         {
             UsbDevice device = (UsbDevice)((ToolStripMenuItem)sender).Tag;
             System.Diagnostics.Debug.WriteLine($"usbipd unbind {device.BusId}");
+            if (!_usbipd.Unbind(ref device))
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to unbind {device.BusId}");
+            }
         }
 
     }

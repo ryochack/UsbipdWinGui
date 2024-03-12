@@ -58,7 +58,6 @@ namespace UsbipdGui
             List<ToolStripMenuItem> connectedDeviceItems = [];
             List<ToolStripMenuItem> persistedDeviceItems = [];
 
-            // TODO: ConnectedDevice のタイトルを入れたい
             foreach (UsbDevice dev in usbDevices)
             {
                 System.Diagnostics.Debug.WriteLine(dev);

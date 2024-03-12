@@ -111,6 +111,9 @@ namespace UsbipdGui
                 contextMenu.Items.Add(persistedDeviceLabel);
                 contextMenu.Items.AddRange(persistedDeviceItems.ToArray());
             }
+
+            contextMenu.Items.Add(new ToolStripSeparator());
+            contextMenu.Items.Add(new ToolStripMenuItem($"Quit", null, ClickQuit));
         }
 
         private void ClickNotifyIcon(object? sender, System.Windows.Forms.MouseEventArgs e)
@@ -145,6 +148,10 @@ namespace UsbipdGui
             }
         }
 
+        private void ClickQuit(object? sender, EventArgs e)
+        {
+            Shutdown();
+        }
     }
 
 }

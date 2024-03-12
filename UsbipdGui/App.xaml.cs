@@ -52,8 +52,8 @@ namespace UsbipdGui
         private void UpdateContextMenu(ref System.Windows.Forms.ContextMenuStrip contextMenu, ref List<UsbDevice> usbDevices)
         {
             contextMenu.Items.Clear();
-            contextMenu.Text = "hogehoge";
-            List<UsbDevice> persistedDevices = [];
+            List<ToolStripMenuItem> connectedDeviceItems = [];
+            List<ToolStripMenuItem> persistedDeviceItems = [];
 
             // TODO: ConnectedDevice のタイトルを入れたい
             foreach (UsbDevice dev in usbDevices)
@@ -62,31 +62,54 @@ namespace UsbipdGui
                 switch (dev.State)
                 {
                     case UsbDevice.ConnectionStates.DisconnectedPersisted:
-                        persistedDevices.Add(dev);
+                        {
+                            ToolStripMenuItem item = new ToolStripMenuItem($"none | {dev.Vid}:{dev.Pid} | {dev.Description}");
+                            item.Enabled = false;
+                            persistedDeviceItems.Add(item);
+                        }
                         break;
                     case UsbDevice.ConnectionStates.ConnectedNotShared:
-                        contextMenu.Items.Add($"[{dev.BusId}] {dev.Vid}:{dev.Pid} {dev.Description}", null, ClickBindedDevice);
-                        ((ToolStripMenuItem)contextMenu.Items[contextMenu.Items.Count - 1]).Tag = dev;
+                        {
+                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description}", null, ClickBindedDevice);
+                            item.Tag = dev;
+                            connectedDeviceItems.Add(item);
+                        }
                         break;
                     case UsbDevice.ConnectionStates.ConnectedShared:
-                        contextMenu.Items.Add($"[{dev.BusId}] {dev.Vid}:{dev.Pid} {dev.Description}", null, ClickUnbindedDevice);
-                        ((ToolStripMenuItem)contextMenu.Items[contextMenu.Items.Count - 1]).Checked = true;
-                        ((ToolStripMenuItem)contextMenu.Items[contextMenu.Items.Count - 1]).Tag = dev;
+                        {
+                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description}", null, ClickUnbindedDevice);
+                            item.Tag = dev;
+                            item.Font = new System.Drawing.Font(item.Font, System.Drawing.FontStyle.Bold);
+                            connectedDeviceItems.Add(item);
+                        }
                         break;
                     case UsbDevice.ConnectionStates.ConnectedAttached:
-                        contextMenu.Items.Add($"[{dev.BusId}] {dev.Vid}:{dev.Pid} {dev.Description}");
-                        ((ToolStripMenuItem)contextMenu.Items[contextMenu.Items.Count - 1]).Checked = true;
-                        ((ToolStripMenuItem)contextMenu.Items[contextMenu.Items.Count - 1]).Tag = dev;
+                        {
+                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description}", null, ClickUnbindedDevice);
+                            item.Tag = dev;
+                            item.Font = new System.Drawing.Font(item.Font, System.Drawing.FontStyle.Bold);
+                            connectedDeviceItems.Add(item);
+                        }
                         break;
                     default:
                         break;
                 }
             }
-            // TODO: PersisteDevice のタイトルを入れたい
-            foreach (UsbDevice dev in persistedDevices)
+
+            ToolStripLabel connectedDeviceLabel = new ToolStripLabel("Connected Devices");
+            connectedDeviceLabel.ForeColor = Color.Black;
+            connectedDeviceLabel.Font = new System.Drawing.Font(connectedDeviceLabel.Font, System.Drawing.FontStyle.Underline);
+            contextMenu.Items.Add(connectedDeviceLabel);
+            contextMenu.Items.AddRange(connectedDeviceItems.ToArray());
+
+            if (persistedDeviceItems.Count > 0)
             {
-                contextMenu.Items.Add($"[   ] {dev.Vid}:{dev.Pid} {dev.Description}");
-                contextMenu.Items[contextMenu.Items.Count - 1].Enabled = false;
+                contextMenu.Items.Add(new ToolStripSeparator());
+                ToolStripLabel persistedDeviceLabel = new ToolStripLabel("Persisted Devices");
+                persistedDeviceLabel.Enabled = false;
+                persistedDeviceLabel.Font = new System.Drawing.Font(persistedDeviceLabel.Font, System.Drawing.FontStyle.Underline);
+                contextMenu.Items.Add(persistedDeviceLabel);
+                contextMenu.Items.AddRange(persistedDeviceItems.ToArray());
             }
         }
 

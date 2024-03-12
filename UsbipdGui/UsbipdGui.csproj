@@ -12,6 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Resource Include="resource\state_attach.ico" />
+    <Resource Include="resource\state_bind.ico" />
     <Resource Include="resource\usbip_darktheme.ico" />
   </ItemGroup>
 

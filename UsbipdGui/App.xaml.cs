@@ -14,6 +14,9 @@ namespace UsbipdGui
         private System.Windows.Forms.NotifyIcon _notifyIcon = new();
         private System.Windows.Forms.ContextMenuStrip _contextMenu = new();
         private Usbipd? _usbipd = null;
+        private System.Drawing.Image _bindIconImage = Image.FromStream(GetResourceStream(new Uri("resource/state_bind.ico", UriKind.Relative)).Stream);
+        private System.Drawing.Image _attachIconImage = Image.FromStream(GetResourceStream(new Uri("resource/state_attach.ico", UriKind.Relative)).Stream);
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -77,16 +80,18 @@ namespace UsbipdGui
                         break;
                     case UsbDevice.ConnectionStates.ConnectedShared:
                         {
-                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description}", null, ClickUnbindedDevice);
+                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description} (Shared)", null, ClickUnbindedDevice);
                             item.Tag = dev;
+                            item.Image = _bindIconImage;
                             item.Font = new System.Drawing.Font(item.Font, System.Drawing.FontStyle.Bold);
                             connectedDeviceItems.Add(item);
                         }
                         break;
                     case UsbDevice.ConnectionStates.ConnectedAttached:
                         {
-                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description}", null, ClickUnbindedDevice);
+                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description} (Attached)", null, ClickUnbindedDevice);
                             item.Tag = dev;
+                            item.Image = _attachIconImage;
                             item.Font = new System.Drawing.Font(item.Font, System.Drawing.FontStyle.Bold);
                             connectedDeviceItems.Add(item);
                         }

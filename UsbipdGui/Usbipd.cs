@@ -93,7 +93,8 @@ namespace UsbipdGui
                     device.GetProperty("PersistedGuid").GetString(),
                     device.GetProperty("StubInstanceId").GetString()));
             }
-            return usbDevices;
+
+            return usbDevices.OrderBy(dev => Single.Parse((dev.BusId ?? "0").Replace('-', '.'))).ToList();
         }
 
         public bool Bind(ref UsbDevice device)

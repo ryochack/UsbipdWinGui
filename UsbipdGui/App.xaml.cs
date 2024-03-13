@@ -72,14 +72,14 @@ namespace UsbipdGui
                         break;
                     case UsbDevice.ConnectionStates.ConnectedNotShared:
                         {
-                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description}", null, ClickBindedDevice);
+                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description}", null, ClickUnbindedDevice);
                             item.Tag = dev;
                             connectedDeviceItems.Add(item);
                         }
                         break;
                     case UsbDevice.ConnectionStates.ConnectedShared:
                         {
-                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description} (Shared)", null, ClickUnbindedDevice);
+                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description} (Shared)", null, ClickBindedDevice);
                             item.Tag = dev;
                             item.Image = _bindIconImage;
                             item.Font = new System.Drawing.Font(item.Font, System.Drawing.FontStyle.Bold);
@@ -88,7 +88,7 @@ namespace UsbipdGui
                         break;
                     case UsbDevice.ConnectionStates.ConnectedAttached:
                         {
-                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description} (Attached)", null, ClickUnbindedDevice);
+                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description} (Attached)", null, ClickAttachedDevice);
                             item.Tag = dev;
                             item.Image = _attachIconImage;
                             item.Font = new System.Drawing.Font(item.Font, System.Drawing.FontStyle.Bold);
@@ -132,7 +132,7 @@ namespace UsbipdGui
                     break;
             }
         }
-        private void ClickBindedDevice(object? sender, EventArgs e)
+        private void ClickUnbindedDevice(object? sender, EventArgs e)
         {
             UsbDevice device = (UsbDevice)((ToolStripMenuItem)sender).Tag;
             System.Diagnostics.Debug.WriteLine($"usbipd bind {device.BusId}");
@@ -142,7 +142,7 @@ namespace UsbipdGui
             }
         }
 
-        private void ClickUnbindedDevice(object? sender, EventArgs e)
+        private void ClickBindedDevice(object? sender, EventArgs e)
         {
             UsbDevice device = (UsbDevice)((ToolStripMenuItem)sender).Tag;
             System.Diagnostics.Debug.WriteLine($"usbipd unbind {device.BusId}");
@@ -150,6 +150,25 @@ namespace UsbipdGui
             {
                 System.Diagnostics.Debug.WriteLine($"Failed to unbind {device.BusId}");
             }
+        }
+
+        private void ClickAttachedDevice(object? sender, EventArgs e)
+        {
+            UsbDevice device = (UsbDevice)((ToolStripMenuItem)sender).Tag;
+
+            if (System.Windows.Forms.MessageBox.Show(
+                $"\"{device.BusId} {device.Description}\" is currently attached from other machine.\nDo you really want to unbind it?",
+                "usbipd-gui",
+                System.Windows.Forms.MessageBoxButtons.YesNo,
+                System.Windows.Forms.MessageBoxIcon.Asterisk
+                ) == System.Windows.Forms.DialogResult.Yes)
+            {
+            System.Diagnostics.Debug.WriteLine($"usbipd unbind {device.BusId}");
+            if (!_usbipd.Unbind(ref device))
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to unbind {device.BusId}");
+            }
+        }
         }
 
         private void ClickQuit(object? sender, EventArgs e)

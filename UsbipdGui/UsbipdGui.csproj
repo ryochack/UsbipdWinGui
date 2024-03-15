@@ -15,6 +15,7 @@
     <Resource Include="resource\state_attach.ico" />
     <Resource Include="resource\state_bind.ico" />
     <Resource Include="resource\usbip_darktheme.ico" />
+    <Resource Include="resource\usbip_lighttheme.ico" />
   </ItemGroup>
 
 </Project>

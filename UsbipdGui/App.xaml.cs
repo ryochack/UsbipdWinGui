@@ -44,7 +44,7 @@ namespace UsbipdGui
 
             _notifyIcon.Visible = true;
             _notifyIcon.Text = "usbipd";
-            _notifyIcon.Icon = new System.Drawing.Icon(GetResourceStream(new Uri("resource/usbip_darktheme.ico", UriKind.Relative)).Stream);
+            _notifyIcon.Icon = GetNotifyIcon();
             _notifyIcon.ContextMenuStrip = _contextMenu;
             _notifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(ClickNotifyIcon);
 
@@ -57,6 +57,19 @@ namespace UsbipdGui
             _contextMenu.Dispose();
             _notifyIcon.Dispose();
             base.OnExit(e);
+        }
+
+        private static bool IsLightTheme()
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            var value = key?.GetValue("AppsUseLightTheme");
+            return value is int i && i > 0;
+        }
+
+        private static System.Drawing.Icon GetNotifyIcon()
+        {
+            string path = (IsLightTheme()) ? "resource/usbip_lighttheme.ico" : "resource/usbip_darktheme.ico";
+            return new System.Drawing.Icon(GetResourceStream(new Uri(path, UriKind.Relative)).Stream);
         }
 
         private void UpdateContextMenu(ref System.Windows.Forms.ContextMenuStrip contextMenu, ref List<UsbDevice> usbDevices)

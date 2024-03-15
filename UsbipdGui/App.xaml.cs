@@ -52,6 +52,13 @@ namespace UsbipdGui
             UpdateContextMenu(ref _contextMenu, ref usbDevices);
         }
 
+        protected override void OnExit(ExitEventArgs e)
+        {
+            _contextMenu.Dispose();
+            _notifyIcon.Dispose();
+            base.OnExit(e);
+        }
+
         private void UpdateContextMenu(ref System.Windows.Forms.ContextMenuStrip contextMenu, ref List<UsbDevice> usbDevices)
         {
             contextMenu.Items.Clear();

@@ -14,8 +14,8 @@ namespace UsbipdGui
         private System.Windows.Forms.NotifyIcon _notifyIcon = new();
         private System.Windows.Forms.ContextMenuStrip _contextMenu = new();
         private Usbipd? _usbipd = null;
-        private System.Drawing.Image _bindIconImage = Image.FromStream(GetResourceStream(new Uri("resource/state_bind.ico", UriKind.Relative)).Stream);
-        private System.Drawing.Image _attachIconImage = Image.FromStream(GetResourceStream(new Uri("resource/state_attach.ico", UriKind.Relative)).Stream);
+        private System.Drawing.Image _bindIconImage = System.Drawing.Image.FromStream(GetResourceStream(new Uri("resource/state_bind.ico", UriKind.Relative)).Stream);
+        private System.Drawing.Image _attachIconImage = System.Drawing.Image.FromStream(GetResourceStream(new Uri("resource/state_attach.ico", UriKind.Relative)).Stream);
 
         protected override void OnStartup(StartupEventArgs e)
         {

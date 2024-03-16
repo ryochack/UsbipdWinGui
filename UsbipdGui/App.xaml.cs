@@ -1,4 +1,4 @@
-﻿using System.Configuration;
+using System.Configuration;
 using System.Data;
 using System.Windows;
 using System.Windows.Forms;
@@ -14,6 +14,8 @@ namespace UsbipdGui
         private System.Windows.Forms.NotifyIcon _notifyIcon = new();
         private System.Windows.Forms.ContextMenuStrip _contextMenu = new();
         private Usbipd? _usbipd = null;
+        private System.Drawing.Icon _lightThemeIcon = new System.Drawing.Icon(GetResourceStream(new Uri("resource/usbip_lighttheme.ico", UriKind.Relative)).Stream);
+        private System.Drawing.Icon _darkThemeIcon = new System.Drawing.Icon(GetResourceStream(new Uri("resource/usbip_darktheme.ico", UriKind.Relative)).Stream);
         private System.Drawing.Image _bindIconImage = System.Drawing.Image.FromStream(GetResourceStream(new Uri("resource/state_bind.ico", UriKind.Relative)).Stream);
         private System.Drawing.Image _attachIconImage = System.Drawing.Image.FromStream(GetResourceStream(new Uri("resource/state_attach.ico", UriKind.Relative)).Stream);
 
@@ -50,6 +52,9 @@ namespace UsbipdGui
 
             var usbDevices = _usbipd.GetUsbDevices();
             UpdateContextMenu(ref _contextMenu, ref usbDevices);
+
+            // Add system eventt handler to switch the theme of notify icon
+            Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -66,10 +71,23 @@ namespace UsbipdGui
             return value is int i && i > 0;
         }
 
-        private static System.Drawing.Icon GetNotifyIcon()
+        private System.Drawing.Icon GetNotifyIcon()
         {
-            string path = (IsLightTheme()) ? "resource/usbip_lighttheme.ico" : "resource/usbip_darktheme.ico";
-            return new System.Drawing.Icon(GetResourceStream(new Uri(path, UriKind.Relative)).Stream);
+            if (IsLightTheme()) {
+                return _lightThemeIcon;
+            } else {
+                return _darkThemeIcon;
+        }
+        }
+
+        private void SystemEvents_UserPreferenceChanged(object sender, Microsoft.Win32.UserPreferenceChangedEventArgs e)
+        {
+            // This event handler will be called when the system theme is changed.
+            if (e.Category == Microsoft.Win32.UserPreferenceCategory.General)
+            {
+                // update notify icon for dark or light theme
+                _notifyIcon.Icon = GetNotifyIcon();
+            }
         }
 
         private void UpdateContextMenu(ref System.Windows.Forms.ContextMenuStrip contextMenu, ref List<UsbDevice> usbDevices)

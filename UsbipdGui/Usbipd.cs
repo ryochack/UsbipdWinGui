@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static UsbipdGui.Usbipd;
 
 namespace UsbipdGui
 {
@@ -39,6 +40,12 @@ namespace UsbipdGui
                 State = (!String.IsNullOrWhiteSpace(BusId) ? ConnectionStates.Connected : ConnectionStates.None)
                     | (!String.IsNullOrWhiteSpace(PersistedGuid) ? ConnectionStates.Shared : ConnectionStates.None)
                     | (!String.IsNullOrWhiteSpace(ClientIpAddr) ? ConnectionStates.Attached : ConnectionStates.None);
+            }
+
+            public UsbDevice(string vid, string pid)
+            {
+                Vid = vid;
+                Pid = pid;
             }
 
             public ConnectionStates State { get; init; }
@@ -217,5 +224,15 @@ namespace UsbipdGui
             return (match.Groups[1].Value, match.Groups[2].Value);
         }
 
+    }
+
+    class UsbVipPidEqualityComparer : IEqualityComparer<UsbDevice>
+    {
+        public bool Equals(UsbDevice a, UsbDevice b)
+        {
+            return (a.Vid == b.Vid) && (a.Pid == b.Pid);
+        }
+
+        public int GetHashCode(UsbDevice dev) => dev.Vid.GetHashCode() ^ dev.Pid.GetHashCode();
     }
 }

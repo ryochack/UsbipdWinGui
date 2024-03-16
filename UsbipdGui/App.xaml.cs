@@ -1,7 +1,11 @@
+﻿using System.Collections.Specialized;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Forms;
+using UsbipdGui.Properties;
 using static UsbipdGui.Usbipd;
 
 namespace UsbipdGui
@@ -19,6 +23,7 @@ namespace UsbipdGui
         private System.Drawing.Image _bindIconImage = System.Drawing.Image.FromStream(GetResourceStream(new Uri("resource/state_bind.ico", UriKind.Relative)).Stream);
         private System.Drawing.Image _attachIconImage = System.Drawing.Image.FromStream(GetResourceStream(new Uri("resource/state_attach.ico", UriKind.Relative)).Stream);
         private List<UsbDevice> _ignoredDeviceList = [];
+        Settings _settings = new Settings();
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -56,6 +61,43 @@ namespace UsbipdGui
 
             // Add system eventt handler to switch the theme of notify icon
             Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+
+            _ignoredDeviceList = LoadIgnoredUsbIdList();
+        }
+
+        private List<UsbDevice> LoadIgnoredUsbIdList()
+        {
+            Regex regex = UsbIdRegex();
+            List<UsbDevice> usbDevices = [];
+
+            List<string> listAsString = _settings.IgnoredUsbIds?.Cast<string>().ToList() ?? [];
+            Debug.WriteLine("===== Load Ignored Usb ID List =====");
+            foreach (string s in listAsString)
+            {
+                Debug.WriteLine(s);
+                Match match = regex.Match(s);
+                if (match.Success)
+                {
+                    usbDevices.Add(new UsbDevice(match.Groups[1].Value, match.Groups[2].Value));
+                }
+            }
+            Debug.WriteLine("==========");
+            return usbDevices;
+        }
+
+        // Regex target examples: "8087:0025"
+        [GeneratedRegex(@"(\w{4}):(\w{4})")]
+        private static partial Regex UsbIdRegex();
+
+        private void SaveIgnoredUsbIdList(in List<UsbDevice> usbDevices)
+        {
+            _settings.IgnoredUsbIds?.Clear();
+            if (_settings.IgnoredUsbIds is null)
+            {
+                _settings.IgnoredUsbIds = new StringCollection();
+            }
+            _settings.IgnoredUsbIds?.AddRange(usbDevices.Select(dev => $"{dev.Vid}:{dev.Pid}").ToArray());
+            _settings.Save();
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -78,7 +120,7 @@ namespace UsbipdGui
                 return _lightThemeIcon;
             } else {
                 return _darkThemeIcon;
-        }
+            }
         }
 
         private void SystemEvents_UserPreferenceChanged(object sender, Microsoft.Win32.UserPreferenceChangedEventArgs e)
@@ -97,7 +139,18 @@ namespace UsbipdGui
             List<ToolStripMenuItem> connectedDeviceItems = [];
             List<ToolStripMenuItem> persistedDeviceItems = [];
 
-            foreach (UsbDevice dev in usbDevices.Except(_ignoredDeviceList, new UsbVipPidEqualityComparer()))
+            // Update ignored list
+            for (int i = 0; i < _ignoredDeviceList.Count; i++) {
+                UsbDevice matchedDevice = usbDevices.FirstOrDefault(dev => ((dev.Vid == _ignoredDeviceList[i].Vid) && (dev.Pid == _ignoredDeviceList[i].Pid)));
+                if ((matchedDevice.Vid is not null) && (matchedDevice.Pid is not null)) {
+                    _ignoredDeviceList[i] = matchedDevice;
+                } else
+                {
+                    _ignoredDeviceList[i] = new UsbDevice(_ignoredDeviceList[i].Description, _ignoredDeviceList[i].Vid, _ignoredDeviceList[i].Pid);
+                }
+            }
+
+            foreach (UsbDevice dev in usbDevices.Except(_ignoredDeviceList, new UsbIdEqualityComparer()))
             {
                 System.Diagnostics.Debug.WriteLine(dev);
                 switch (dev.State)
@@ -114,6 +167,7 @@ namespace UsbipdGui
                             string desc = $"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description}";
                             ToolStripMenuItem item = new ToolStripMenuItem(desc);
                             item.Tag = dev;
+                            item.ToolTipText = "Bind this device (or Right click to ignore)";
                             item.MouseUp += (sender, e) =>
                             {
 
@@ -140,6 +194,7 @@ namespace UsbipdGui
                             item.Tag = dev;
                             item.Image = _bindIconImage;
                             item.Font = new System.Drawing.Font(item.Font, System.Drawing.FontStyle.Bold);
+                            item.ToolTipText = "Unbind this device";
                             connectedDeviceItems.Add(item);
                         }
                         break;
@@ -149,6 +204,7 @@ namespace UsbipdGui
                             item.Tag = dev;
                             item.Image = _attachIconImage;
                             item.Font = new System.Drawing.Font(item.Font, System.Drawing.FontStyle.Bold);
+                            item.ToolTipText = "Unbind this device";
                             connectedDeviceItems.Add(item);
                         }
                         break;
@@ -157,38 +213,68 @@ namespace UsbipdGui
                 }
             }
 
-            ToolStripLabel connectedDeviceLabel = new ToolStripLabel("Connected Devices");
-            connectedDeviceLabel.ForeColor = Color.Black;
-            connectedDeviceLabel.Font = new System.Drawing.Font(connectedDeviceLabel.Font, System.Drawing.FontStyle.Underline);
-            contextMenu.Items.Add(connectedDeviceLabel);
-            contextMenu.Items.AddRange(connectedDeviceItems.ToArray());
+            // List connected devices
+            {
+                ToolStripLabel connectedDeviceLabel = new ToolStripLabel("Connected USB Devices");
+                connectedDeviceLabel.ForeColor = Color.Black;
+                connectedDeviceLabel.Font = new System.Drawing.Font(connectedDeviceLabel.Font, System.Drawing.FontStyle.Underline);
+                contextMenu.Items.Add(connectedDeviceLabel);
+                contextMenu.Items.AddRange(connectedDeviceItems.ToArray());
+            }
 
+            // List persisted devices
             if (persistedDeviceItems.Count > 0)
             {
                 contextMenu.Items.Add(new ToolStripSeparator());
-                ToolStripLabel persistedDeviceLabel = new ToolStripLabel("Persisted Devices");
+                ToolStripLabel persistedDeviceLabel = new ToolStripLabel("Persisted USB Devices");
                 persistedDeviceLabel.Enabled = false;
                 persistedDeviceLabel.Font = new System.Drawing.Font(persistedDeviceLabel.Font, System.Drawing.FontStyle.Underline);
                 contextMenu.Items.Add(persistedDeviceLabel);
                 contextMenu.Items.AddRange(persistedDeviceItems.ToArray());
             }
 
+            // Drop Down item of ignored devices
             {
                 contextMenu.Items.Add(new ToolStripSeparator());
-                ToolStripMenuItem dropDownIgnoredDevice = new ToolStripMenuItem("Ignored device list...");
+                ToolStripMenuItem dropDownMenu = new ToolStripMenuItem("Ignored USB Device List...");
                 if (_ignoredDeviceList.Count == 0)
                 {
-                    dropDownIgnoredDevice.Enabled = false;
+                    dropDownMenu.Enabled = false;
                 } else
                 {
+                    List<ToolStripMenuItem> connectedIgnoreList = [];
+                    List<ToolStripMenuItem> disconnectedIgnoreList = [];
                     foreach (UsbDevice dev in _ignoredDeviceList)
                     {
-                        ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId ?? "none"} | {dev.Vid}:{dev.Pid} | {dev.Description}");
-                        item.ToolTipText = "Restore from ignored list";
-                        dropDownIgnoredDevice.DropDownItems.Add(item);
+                        ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId ?? "none"} | {dev.Vid}:{dev.Pid} | {dev.Description}", null, ClickIgnoredDevice);
+                        item.Tag = dev;
+                        if ((dev.State & UsbDevice.ConnectionStates.Connected) != 0)
+                        {
+                            item.ToolTipText = "Restore from ignored list";
+                            connectedIgnoreList.Add(item);
+                        }
+                        else
+                        {
+                            item.ToolTipText = "Remove from ignored list";
+                            disconnectedIgnoreList.Add(item);
+                        }
+                    }
+                    if (connectedIgnoreList.Count > 0)
+                    {
+                        ToolStripLabel connectedDeviceLabel = new ToolStripLabel("Connected USB Devices");
+                        connectedDeviceLabel.Font = new System.Drawing.Font(connectedDeviceLabel.Font, System.Drawing.FontStyle.Underline);
+                        dropDownMenu.DropDownItems.Add(connectedDeviceLabel);
+                        dropDownMenu.DropDownItems.AddRange(connectedIgnoreList.ToArray());
+                    }
+                    if (disconnectedIgnoreList.Count > 0)
+                    {
+                        ToolStripLabel disconnectedDeviceLabel = new ToolStripLabel("Disconnected USB Devices");
+                        disconnectedDeviceLabel.Font = new System.Drawing.Font(disconnectedDeviceLabel.Font, System.Drawing.FontStyle.Underline);
+                        dropDownMenu.DropDownItems.Add(disconnectedDeviceLabel);
+                        dropDownMenu.DropDownItems.AddRange(disconnectedIgnoreList.ToArray());
                     }
                 }
-                contextMenu.Items.Add(dropDownIgnoredDevice);
+                contextMenu.Items.Add(dropDownMenu);
             }
 
             contextMenu.Items.Add(new ToolStripSeparator());
@@ -215,6 +301,18 @@ namespace UsbipdGui
                 UsbDevice device = (UsbDevice)((ToolStripMenuItem)sender).Tag;
                 System.Diagnostics.Debug.WriteLine($"Ignore => {device.Vid}:{device.Pid} {device.Description}");
                 _ignoredDeviceList.Add(device);
+                SaveIgnoredUsbIdList(_ignoredDeviceList);
+            }
+        }
+
+        private void ClickIgnoredDevice(object? sender, EventArgs e)
+        {
+            if (sender is not null)
+            {
+                UsbDevice device = (UsbDevice)((ToolStripMenuItem)sender).Tag;
+                System.Diagnostics.Debug.WriteLine($"Unignore => {device.Vid}:{device.Pid} {device.Description}");
+                _ignoredDeviceList.Remove(device);
+                SaveIgnoredUsbIdList(_ignoredDeviceList);
             }
         }
 
@@ -249,12 +347,12 @@ namespace UsbipdGui
                 System.Windows.Forms.MessageBoxIcon.Asterisk
                 ) == System.Windows.Forms.DialogResult.Yes)
             {
-            System.Diagnostics.Debug.WriteLine($"usbipd unbind {device.BusId}");
-            if (!_usbipd.Unbind(ref device))
-            {
-                System.Diagnostics.Debug.WriteLine($"Failed to unbind {device.BusId}");
+                System.Diagnostics.Debug.WriteLine($"usbipd unbind {device.BusId}");
+                if (!_usbipd.Unbind(ref device))
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to unbind {device.BusId}");
+                }
             }
-        }
         }
 
         private void ClickQuit(object? sender, EventArgs e)

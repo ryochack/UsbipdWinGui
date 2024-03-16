@@ -20,6 +20,7 @@ namespace UsbipdGui
                 Connected = 0b_0001,
                 Shared = 0b_0010,
                 Attached = 0b_0100,
+                Disconnected = None,
                 DisconnectedPersisted = Shared,
                 ConnectedNotShared = Connected,
                 ConnectedShared = Connected | Shared,
@@ -46,18 +47,26 @@ namespace UsbipdGui
             {
                 Vid = vid;
                 Pid = pid;
+                State = ConnectionStates.Disconnected;
+            }
+
+            public UsbDevice(string description, string vid, string pid)
+            {
+                Description = description;
+                Vid = vid;
+                Pid = pid;
+                State = ConnectionStates.Disconnected;
             }
 
             public ConnectionStates State { get; init; }
-
-            public string? BusId { get; init; }
-            public string? ClientIpAddr { get; init; }
-            public string? Description { get; init; }
-            public string? Vid { get; init; }
-            public string? Pid { get; init; }
+            public string BusId { get; init; }
+            public string ClientIpAddr { get; init; }
+            public string Description { get; init; }
+            public string Vid { get; init; }
+            public string Pid { get; init; }
             public bool IsForced { get; init; }
-            public string? PersistedGuid { get; init; }
-            public string? StubInstanceId { get; init; }
+            public string PersistedGuid { get; init; }
+            public string StubInstanceId { get; init; }
 
             public override string ToString()
             {
@@ -226,7 +235,7 @@ namespace UsbipdGui
 
     }
 
-    class UsbVipPidEqualityComparer : IEqualityComparer<UsbDevice>
+    class UsbIdEqualityComparer : IEqualityComparer<UsbDevice>
     {
         public bool Equals(UsbDevice a, UsbDevice b)
         {

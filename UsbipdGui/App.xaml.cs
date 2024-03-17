@@ -54,7 +54,7 @@ namespace UsbipdGui
             _notifyIcon.Text = "usbipd";
             _notifyIcon.Icon = GetNotifyIcon();
             _notifyIcon.ContextMenuStrip = _contextMenu;
-            _notifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(ClickNotifyIcon);
+            _notifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(OnClickToShowAppMenu);
 
             var usbDevices = _usbipd.GetUsbDevices();
             UpdateContextMenu(ref _contextMenu, ref usbDevices);
@@ -173,13 +173,13 @@ namespace UsbipdGui
 
                                 if (e.Button == MouseButtons.Left)
                                 {
-                                    ClickUnbindedDevice(sender, e);
+                                    OnLeftClickToBindDevice(sender, e);
                                 }
                                 else if (e.Button == MouseButtons.Right)
                                 {
                                     UsbDevice device = (UsbDevice)((ToolStripMenuItem)sender).Tag;
                                     ContextMenuStrip subMenu = new ContextMenuStrip();
-                                    ToolStripMenuItem item = new ToolStripMenuItem($"Ignore {desc}", null, ClickIgnoreDevice);
+                                    ToolStripMenuItem item = new ToolStripMenuItem($"Ignore {desc}", null, OnLeftClickToAddIgnoreList);
                                     item.Tag = device;
                                     subMenu.Items.Add(item);
                                     subMenu.Show(Cursor.Position);
@@ -190,21 +190,35 @@ namespace UsbipdGui
                         break;
                     case UsbDevice.ConnectionStates.ConnectedShared:
                         {
-                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description} (Shared)", null, ClickBindedDevice);
+                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description} (Shared)");
                             item.Tag = dev;
                             item.Image = _bindIconImage;
                             item.Font = new System.Drawing.Font(item.Font, System.Drawing.FontStyle.Bold);
                             item.ToolTipText = "Unbind this device";
+                            item.MouseUp += (sender, e) =>
+                            {
+                                if (e.Button == MouseButtons.Left)
+                                {
+                                    OnLeftClickToUnbindDevice(sender, e);
+                                }
+                            };
                             connectedDeviceItems.Add(item);
                         }
                         break;
                     case UsbDevice.ConnectionStates.ConnectedAttached:
                         {
-                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description} (Attached)", null, ClickAttachedDevice);
+                            ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId} | {dev.Vid}:{dev.Pid} | {dev.Description} (Attached)");
                             item.Tag = dev;
                             item.Image = _attachIconImage;
                             item.Font = new System.Drawing.Font(item.Font, System.Drawing.FontStyle.Bold);
                             item.ToolTipText = "Unbind this device";
+                            item.MouseUp += (sender, e) =>
+                            {
+                                if (e.Button == MouseButtons.Left)
+                                {
+                                    OnLeftClickToUnbindDeviceWithCaution(sender, e);
+                                }
+                            };
                             connectedDeviceItems.Add(item);
                         }
                         break;
@@ -246,7 +260,7 @@ namespace UsbipdGui
                     List<ToolStripMenuItem> disconnectedIgnoreList = [];
                     foreach (UsbDevice dev in _ignoredDeviceList)
                     {
-                        ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId ?? "none"} | {dev.Vid}:{dev.Pid} | {dev.Description}", null, ClickIgnoredDevice);
+                        ToolStripMenuItem item = new ToolStripMenuItem($"{dev.BusId ?? "none"} | {dev.Vid}:{dev.Pid} | {dev.Description}");
                         item.Tag = dev;
                         if ((dev.State & UsbDevice.ConnectionStates.Connected) != 0)
                         {
@@ -258,6 +272,13 @@ namespace UsbipdGui
                             item.ToolTipText = "Remove from ignored list";
                             disconnectedIgnoreList.Add(item);
                         }
+                        item.MouseUp += (sender, e) =>
+                        {
+                            if (e.Button == MouseButtons.Left)
+                            {
+                                OnLeftClickToRemoveFromIgnoreList(sender, e);
+                            }
+                        };
                     }
                     if (connectedIgnoreList.Count > 0)
                     {
@@ -277,11 +298,22 @@ namespace UsbipdGui
                 contextMenu.Items.Add(dropDownMenu);
             }
 
-            contextMenu.Items.Add(new ToolStripSeparator());
-            contextMenu.Items.Add(new ToolStripMenuItem($"Quit", null, ClickQuit));
+            // Quit item
+            {
+                contextMenu.Items.Add(new ToolStripSeparator());
+                ToolStripMenuItem quitItem = new ToolStripMenuItem($"Quit");
+                quitItem.MouseUp += (sender, e) =>
+                {
+                    if (e.Button == MouseButtons.Left)
+                    {
+                        OnLeftClickToQuit(sender, e);
+                    }
+                };
+                contextMenu.Items.Add(quitItem);
+            }
         }
 
-        private void ClickNotifyIcon(object? sender, System.Windows.Forms.MouseEventArgs e)
+        private void OnClickToShowAppMenu(object? sender, System.Windows.Forms.MouseEventArgs e)
         {
             switch (e.Button)
             {
@@ -294,7 +326,7 @@ namespace UsbipdGui
             }
         }
 
-        private void ClickIgnoreDevice(object? sender, EventArgs e)
+        private void OnLeftClickToAddIgnoreList(object? sender, EventArgs e)
         {
             if (sender is not null)
             {
@@ -305,7 +337,7 @@ namespace UsbipdGui
             }
         }
 
-        private void ClickIgnoredDevice(object? sender, EventArgs e)
+        private void OnLeftClickToRemoveFromIgnoreList(object? sender, EventArgs e)
         {
             if (sender is not null)
             {
@@ -316,7 +348,7 @@ namespace UsbipdGui
             }
         }
 
-        private void ClickUnbindedDevice(object? sender, EventArgs e)
+        private void OnLeftClickToBindDevice(object? sender, EventArgs e)
         {
             UsbDevice device = (UsbDevice)((ToolStripMenuItem)sender).Tag;
             System.Diagnostics.Debug.WriteLine($"usbipd bind {device.BusId}");
@@ -326,7 +358,7 @@ namespace UsbipdGui
             }
         }
 
-        private void ClickBindedDevice(object? sender, EventArgs e)
+        private void OnLeftClickToUnbindDevice(object? sender, EventArgs e)
         {
             UsbDevice device = (UsbDevice)((ToolStripMenuItem)sender).Tag;
             System.Diagnostics.Debug.WriteLine($"usbipd unbind {device.BusId}");
@@ -336,7 +368,7 @@ namespace UsbipdGui
             }
         }
 
-        private void ClickAttachedDevice(object? sender, EventArgs e)
+        private void OnLeftClickToUnbindDeviceWithCaution(object? sender, EventArgs e)
         {
             UsbDevice device = (UsbDevice)((ToolStripMenuItem)sender).Tag;
 
@@ -355,7 +387,7 @@ namespace UsbipdGui
             }
         }
 
-        private void ClickQuit(object? sender, EventArgs e)
+        private void OnLeftClickToQuit(object? sender, EventArgs e)
         {
             Shutdown();
         }

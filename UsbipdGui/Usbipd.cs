@@ -12,7 +12,7 @@ namespace UsbipdGui
 {
     partial class Usbipd
     {
-        public readonly struct UsbDevice
+        public class UsbDevice
         {
             public enum ConnectionStates
             {
@@ -43,14 +43,14 @@ namespace UsbipdGui
                     | (!String.IsNullOrWhiteSpace(ClientIpAddr) ? ConnectionStates.Attached : ConnectionStates.None);
             }
 
-            public UsbDevice(string vid, string pid)
+            public UsbDevice(string? vid, string? pid)
             {
                 Vid = vid;
                 Pid = pid;
                 State = ConnectionStates.Disconnected;
             }
 
-            public UsbDevice(string description, string vid, string pid)
+            public UsbDevice(string? description, string? vid, string? pid)
             {
                 Description = description;
                 Vid = vid;
@@ -59,14 +59,14 @@ namespace UsbipdGui
             }
 
             public ConnectionStates State { get; init; }
-            public string BusId { get; init; }
-            public string ClientIpAddr { get; init; }
-            public string Description { get; init; }
-            public string Vid { get; init; }
-            public string Pid { get; init; }
+            public string? BusId { get; init; }
+            public string? ClientIpAddr { get; init; }
+            public string? Description { get; init; }
+            public string? Vid { get; init; }
+            public string? Pid { get; init; }
             public bool IsForced { get; init; }
-            public string PersistedGuid { get; init; }
-            public string StubInstanceId { get; init; }
+            public string? PersistedGuid { get; init; }
+            public string? StubInstanceId { get; init; }
 
             public override string ToString()
             {
@@ -237,11 +237,15 @@ namespace UsbipdGui
 
     class UsbIdEqualityComparer : IEqualityComparer<UsbDevice>
     {
-        public bool Equals(UsbDevice a, UsbDevice b)
+        public bool Equals(UsbDevice? a, UsbDevice? b)
         {
+            if (a is null || b is null)
+            {
+                return false;
+            }
             return (a.Vid == b.Vid) && (a.Pid == b.Pid);
         }
 
-        public int GetHashCode(UsbDevice dev) => dev.Vid.GetHashCode() ^ dev.Pid.GetHashCode();
+        public int GetHashCode(UsbDevice dev) => (dev.Vid?.GetHashCode() ?? 0) ^ (dev.Pid?.GetHashCode() ?? 0);
     }
 }

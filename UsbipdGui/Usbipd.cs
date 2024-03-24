@@ -70,7 +70,7 @@ namespace UsbipdGui
 
             public override string ToString()
             {
-                return $"BusId:{BusId}  Description:{Description}\n- State:{State}\n- ClientIpAddr:{ClientIpAddr}\n- VID/PID:{Vid}:{Pid}\n- IsForced:{IsForced}\n- PersistedGuid:{PersistedGuid}\n- StubInstanceId:{StubInstanceId}";
+                return $"BusId:{BusId} Desc:{Description} State:{State} ClientIpAddr:{ClientIpAddr} VID/PID:{Vid}/{Pid} IsForced:{IsForced} PersistedGuid:{PersistedGuid} StubInstanceId:{StubInstanceId}";
             }
         }
 

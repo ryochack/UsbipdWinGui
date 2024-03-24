@@ -13,6 +13,7 @@ namespace UsbipdGui
     /// </summary>
     public partial class App : System.Windows.Application
     {
+        private readonly string _appName = "UsbipdGui";
         // Resources
         private readonly System.Drawing.Icon _lightThemeIcon = new(
             GetResourceStream(new Uri("resource/usbip_lighttheme.ico", UriKind.Relative)).Stream);
@@ -37,7 +38,7 @@ namespace UsbipdGui
             {
                 if (System.Windows.Forms.MessageBox.Show(
                     "'usbipd-win' is not installed.\nWould you like to visit the installation page?",
-                    "usbipd-gui",
+                    _appName,
                     System.Windows.Forms.MessageBoxButtons.YesNo,
                     System.Windows.Forms.MessageBoxIcon.Asterisk
                     ) == System.Windows.Forms.DialogResult.Yes)
@@ -55,7 +56,7 @@ namespace UsbipdGui
             }
 
             _notifyIcon.Visible = true;
-            _notifyIcon.Text = "usbipd";
+            _notifyIcon.Text = _appName;
             _notifyIcon.Icon = GetNotifyIcon();
             _notifyIcon.ContextMenuStrip = _contextMenu;
             _notifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(OnClickToShowAppMenu);
@@ -266,10 +267,6 @@ namespace UsbipdGui
                     // Connected devices
                     _ignoredDeviceList[i] = matchedDevice;
                 }
-                else
-                {
-                    _ignoredDeviceList[i] = new UsbDevice(_ignoredDeviceList[i].Description, _ignoredDeviceList[i].Vid, _ignoredDeviceList[i].Pid);
-                }
             }
 
             foreach (UsbDevice dev in usbDevices.Except(_ignoredDeviceList, new UsbIdEqualityComparer()))
@@ -414,7 +411,7 @@ namespace UsbipdGui
 
         private void OnLeftClickToToggleRunAtStartup(object? sender, EventArgs e)
         {
-            string appName = System.Diagnostics.Process.GetCurrentProcess().ProcessName ?? "UsbipdGui";
+            string appName = System.Diagnostics.Process.GetCurrentProcess().ProcessName ?? _appName;
             string? appPath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
             if (String.IsNullOrWhiteSpace(appPath))
             {
@@ -478,7 +475,7 @@ namespace UsbipdGui
             }
             if (System.Windows.Forms.MessageBox.Show(
                 $"\"{device.BusId} {device.Description}\" is currently attached from {device.ClientIpAddr}.\nDo you really want to unbind it?",
-                "usbipd-gui",
+                _appName,
                 System.Windows.Forms.MessageBoxButtons.YesNo,
                 System.Windows.Forms.MessageBoxIcon.Asterisk
                 ) == System.Windows.Forms.DialogResult.Yes)

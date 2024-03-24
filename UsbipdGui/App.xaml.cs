@@ -258,10 +258,12 @@ namespace UsbipdGui
                 UsbDevice? matchedDevice = usbDevices.FirstOrDefault(dev => ((dev.Vid == _ignoredDeviceList[i].Vid) && (dev.Pid == _ignoredDeviceList[i].Pid)));
                 if (matchedDevice is null)
                 {
-                    continue;
+                    // Disconnected devices
+                    _ignoredDeviceList[i] = new UsbDevice(_ignoredDeviceList[i].Description, _ignoredDeviceList[i].Vid, _ignoredDeviceList[i].Pid);
                 }
-                if ((matchedDevice.Vid is not null) && (matchedDevice.Pid is not null))
+                else
                 {
+                    // Connected devices
                     _ignoredDeviceList[i] = matchedDevice;
                 }
                 else

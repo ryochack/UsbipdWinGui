@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using Microsoft.Win32;
+using System.Collections.Specialized;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
@@ -261,7 +262,8 @@ namespace UsbipdGui
             for (int i = 0; i < _ignoredDeviceList.Count; i++)
             {
                 UsbDevice? matchedDevice = usbDevices.FirstOrDefault(dev => ((dev.Vid == _ignoredDeviceList[i].Vid) && (dev.Pid == _ignoredDeviceList[i].Pid)));
-                if (matchedDevice is null) {
+                if (matchedDevice is null)
+                {
                     continue;
                 }
                 if ((matchedDevice.Vid is not null) && (matchedDevice.Pid is not null))
@@ -358,6 +360,26 @@ namespace UsbipdGui
                 contextMenu.Items.Add(dropDownMenu);
             }
 
+            // Settings Menu
+            {
+                ToolStripMenuItem settingsMenu = new("Settings...");
+                {
+                    ToolStripMenuItem startupItem = new("Run at startup")
+                    {
+                        Checked = _settings.RunAtStartup,
+                    };
+                    startupItem.MouseUp += (sender, e) =>
+                    {
+                        if (e.Button == MouseButtons.Left)
+                        {
+                            OnLeftClickToToggleRunAtStartup(sender, e);
+                        }
+                    };
+                    settingsMenu.DropDownItems.Add(startupItem);
+                }
+                contextMenu.Items.Add(settingsMenu);
+            }
+
             // Quit item
             contextMenu.Items.Add(new ToolStripSeparator());
             contextMenu.Items.Add(BuildQuitItem());
@@ -374,7 +396,8 @@ namespace UsbipdGui
 
         private void OnLeftClickToAddIgnoreList(object? sender, EventArgs e)
         {
-            if ((sender as ToolStripMenuItem)?.Tag is not UsbDevice device) {
+            if ((sender as ToolStripMenuItem)?.Tag is not UsbDevice device)
+            {
                 return;
             }
             System.Diagnostics.Debug.WriteLine($"Ignore => {device.Vid}:{device.Pid} {device.Description}");
@@ -384,7 +407,8 @@ namespace UsbipdGui
 
         private void OnLeftClickToRemoveFromIgnoreList(object? sender, EventArgs e)
         {
-            if ((sender as ToolStripMenuItem)?.Tag is not UsbDevice device) {
+            if ((sender as ToolStripMenuItem)?.Tag is not UsbDevice device)
+            {
                 return;
             }
             System.Diagnostics.Debug.WriteLine($"Unignore => {device.Vid}:{device.Pid} {device.Description}");
@@ -392,9 +416,42 @@ namespace UsbipdGui
             SaveIgnoredUsbIdList(_ignoredDeviceList);
         }
 
+        private void OnLeftClickToToggleRunAtStartup(object? sender, EventArgs e)
+        {
+            string appName = System.Diagnostics.Process.GetCurrentProcess().ProcessName ?? "UsbipdGui";
+            string? appPath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+            if (String.IsNullOrWhiteSpace(appPath))
+            {
+                return;
+            }
+
+            bool nextStateRunAtStartup = !_settings.RunAtStartup;
+
+            using RegistryKey? key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+            if (nextStateRunAtStartup)
+            {
+                // Add Application to Run registory to run at startup
+                key?.SetValue(appName, appPath);
+            }
+            else
+            {
+                // Remove Application from Run registory
+                if (key?.GetValue(appName) is not null)
+                {
+                    key?.DeleteValue(appName);
+                }
+            }
+            Debug.WriteLine($"PATH={key} KEY={appName} VALUE={key?.GetValue(appName)}");
+            key?.Close();
+
+            _settings.RunAtStartup = nextStateRunAtStartup;
+            _settings.Save();
+        }
+
         private void OnLeftClickToBindDevice(object? sender, EventArgs e)
         {
-            if ((sender as ToolStripMenuItem)?.Tag is not UsbDevice device) {
+            if ((sender as ToolStripMenuItem)?.Tag is not UsbDevice device)
+            {
                 return;
             }
             System.Diagnostics.Debug.WriteLine($"usbipd bind {device.BusId}");
@@ -406,7 +463,8 @@ namespace UsbipdGui
 
         private void OnLeftClickToUnbindDevice(object? sender, EventArgs e)
         {
-            if ((sender as ToolStripMenuItem)?.Tag is not UsbDevice device) {
+            if ((sender as ToolStripMenuItem)?.Tag is not UsbDevice device)
+            {
                 return;
             }
             System.Diagnostics.Debug.WriteLine($"usbipd unbind {device.BusId}");
@@ -418,7 +476,8 @@ namespace UsbipdGui
 
         private void OnLeftClickToUnbindDeviceWithCaution(object? sender, EventArgs e)
         {
-            if ((sender as ToolStripMenuItem)?.Tag is not UsbDevice device) {
+            if ((sender as ToolStripMenuItem)?.Tag is not UsbDevice device)
+            {
                 return;
             }
             if (System.Windows.Forms.MessageBox.Show(

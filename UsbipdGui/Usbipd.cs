@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using static UsbipdGui.Usbipd;
 
 namespace UsbipdGui
@@ -215,7 +211,7 @@ namespace UsbipdGui
         // - "InstanceId: USB\VID_8087 & PID_0025\7 & 2E104BF0 & 0 & 2"
         // - "InstanceId: USB\VID_0403 & PID_6001\A901O7VP"
         [GeneratedRegex(@"USB\\VID_(\w{4})&PID_(\w{4})")]
-        private static partial Regex MyRegex();
+        private static partial Regex InstanceIdRegex();
 
         private static (string vid, string pid) ExtractUsbIds(string? instanceIdString)
         {
@@ -223,7 +219,7 @@ namespace UsbipdGui
             {
                 return ("-", "-");
             }
-            Regex regex = MyRegex();
+            Regex regex = InstanceIdRegex();
 
             Match match = regex.Match(instanceIdString);
             if (!match.Success)

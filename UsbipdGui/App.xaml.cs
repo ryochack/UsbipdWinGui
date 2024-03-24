@@ -1,13 +1,8 @@
 ﻿using Microsoft.Win32;
-using System.Collections.Specialized;
-using System.Configuration;
-using System.Data;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Forms;
 using UsbipdGui.Properties;
 using static UsbipdGui.Usbipd;
 
@@ -87,7 +82,6 @@ namespace UsbipdGui
                     usbDevices.Add(new UsbDevice(match.Groups[1].Value, match.Groups[2].Value));
                 }
             }
-            Debug.WriteLine("==========");
             return usbDevices;
         }
 
@@ -278,7 +272,7 @@ namespace UsbipdGui
 
             foreach (UsbDevice dev in usbDevices.Except(_ignoredDeviceList, new UsbIdEqualityComparer()))
             {
-                System.Diagnostics.Debug.WriteLine(dev);
+                Debug.WriteLine(dev);
                 switch (dev.State)
                 {
                     case UsbDevice.ConnectionStates.DisconnectedPersisted:
@@ -400,7 +394,7 @@ namespace UsbipdGui
             {
                 return;
             }
-            System.Diagnostics.Debug.WriteLine($"Ignore => {device.Vid}:{device.Pid} {device.Description}");
+            Debug.WriteLine($"Ignore => {device.Vid}:{device.Pid} {device.Description}");
             _ignoredDeviceList.Add(device);
             SaveIgnoredUsbIdList(_ignoredDeviceList);
         }
@@ -411,7 +405,7 @@ namespace UsbipdGui
             {
                 return;
             }
-            System.Diagnostics.Debug.WriteLine($"Unignore => {device.Vid}:{device.Pid} {device.Description}");
+            Debug.WriteLine($"Unignore => {device.Vid}:{device.Pid} {device.Description}");
             _ignoredDeviceList.Remove(device);
             SaveIgnoredUsbIdList(_ignoredDeviceList);
         }
@@ -454,10 +448,10 @@ namespace UsbipdGui
             {
                 return;
             }
-            System.Diagnostics.Debug.WriteLine($"usbipd bind {device.BusId}");
+            Debug.WriteLine($"usbipd bind {device.BusId}");
             if (!_usbipd?.Bind(ref device) ?? false)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to bind {device.BusId}");
+                Debug.WriteLine($"Failed to bind {device.BusId}");
             }
         }
 
@@ -467,10 +461,10 @@ namespace UsbipdGui
             {
                 return;
             }
-            System.Diagnostics.Debug.WriteLine($"usbipd unbind {device.BusId}");
+            Debug.WriteLine($"usbipd unbind {device.BusId}");
             if (!_usbipd?.Unbind(ref device) ?? false)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to unbind {device.BusId}");
+                Debug.WriteLine($"Failed to unbind {device.BusId}");
             }
         }
 
@@ -487,10 +481,10 @@ namespace UsbipdGui
                 System.Windows.Forms.MessageBoxIcon.Asterisk
                 ) == System.Windows.Forms.DialogResult.Yes)
             {
-                System.Diagnostics.Debug.WriteLine($"usbipd unbind {device.BusId}");
+                Debug.WriteLine($"usbipd unbind {device.BusId}");
                 if (!_usbipd?.Unbind(ref device) ?? false)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Failed to unbind {device.BusId}");
+                    Debug.WriteLine($"Failed to unbind {device.BusId}");
                 }
             }
         }

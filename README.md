@@ -1,8 +1,8 @@
 ![](images/UsbipdGuiIcon.png)
 
 # UsbipdGui: USBIP GUI for Windows
-This application is a simple GUI wrapper for [dorssel/usbipd-win](https://github.com/dorssel/usbipd-win) that is a USB/IP service for Windows.  
-UsbipdGui is very simple and runs only on the system tray.
+This application is a GUI wrapper for [dorssel/usbipd-win](https://github.com/dorssel/usbipd-win) that is a awesome USB/IP service for Windows.  
+UsbipdGui is simple, runs only on the system tray.
 
 ![](images/Screenshot_SystemTrayIcon.png)
 

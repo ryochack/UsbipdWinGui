@@ -234,6 +234,27 @@ namespace UsbipdGui
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private ToolStripMenuItem BuildSettingsItem()
+        {
+            ToolStripMenuItem item = new("Settings...");
+            {
+                ToolStripMenuItem startupItem = new("Run at startup")
+                {
+                    Checked = _settings.RunAtStartup,
+                };
+                startupItem.MouseUp += (sender, e) =>
+                {
+                    if (e.Button == MouseButtons.Left)
+                    {
+                        OnLeftClickToToggleRunAtStartup(sender, e);
+                    }
+                };
+                item.DropDownItems.Add(startupItem);
+            }
+            return item;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ToolStripMenuItem BuildExitItem()
         {
             ToolStripMenuItem item = new($"Exit");
@@ -354,24 +375,7 @@ namespace UsbipdGui
             }
 
             // Settings Menu
-            {
-                ToolStripMenuItem settingsMenu = new("Settings...");
-                {
-                    ToolStripMenuItem startupItem = new("Run at startup")
-                    {
-                        Checked = _settings.RunAtStartup,
-                    };
-                    startupItem.MouseUp += (sender, e) =>
-                    {
-                        if (e.Button == MouseButtons.Left)
-                        {
-                            OnLeftClickToToggleRunAtStartup(sender, e);
-                        }
-                    };
-                    settingsMenu.DropDownItems.Add(startupItem);
-                }
-                contextMenu.Items.Add(settingsMenu);
-            }
+            contextMenu.Items.Add(BuildSettingsItem());
 
             // Exit item
             contextMenu.Items.Add(new ToolStripSeparator());

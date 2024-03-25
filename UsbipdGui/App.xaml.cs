@@ -234,14 +234,14 @@ namespace UsbipdGui
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ToolStripMenuItem BuildQuitItem()
+        private ToolStripMenuItem BuildExitItem()
         {
-            ToolStripMenuItem item = new($"Quit");
+            ToolStripMenuItem item = new($"Exit");
             item.MouseUp += (sender, e) =>
             {
                 if (e.Button == MouseButtons.Left)
                 {
-                    OnLeftClickToQuit(sender, e);
+                    OnLeftClickToExit(sender, e);
                 }
             };
             return item;
@@ -373,9 +373,9 @@ namespace UsbipdGui
                 contextMenu.Items.Add(settingsMenu);
             }
 
-            // Quit item
+            // Exit item
             contextMenu.Items.Add(new ToolStripSeparator());
-            contextMenu.Items.Add(BuildQuitItem());
+            contextMenu.Items.Add(BuildExitItem());
         }
 
         private void OnClickToShowAppMenu(object? sender, System.Windows.Forms.MouseEventArgs e)
@@ -488,7 +488,7 @@ namespace UsbipdGui
             }
         }
 
-        private void OnLeftClickToQuit(object? sender, EventArgs e)
+        private void OnLeftClickToExit(object? sender, EventArgs e)
         {
             Shutdown();
         }

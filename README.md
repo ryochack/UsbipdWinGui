@@ -19,6 +19,9 @@ UsbipdGui provides the following features to make sharing USB devices easier wit
 - Ignore specified USB devices
 - Run at startup
 
+> [!NOTE]
+> UsbipdGui requires administrative permission to bind/unbind USB devices.
+
 ## Usage
 All functions are performed on a context menu that is opened by right-clicking on the system tray icon.
 
@@ -27,7 +30,8 @@ All functions are performed on a context menu that is opened by right-clicking o
 By left-clicking on a connected USB device that has not yet been shared, we can share (bind) that device.
 Shared USB devices are marked with "(Shared)".  
 
-**Note**: UsbipdGui will always force bind.
+> [!NOTE]
+> UsbipdGui will always force bind.
 
 ### Unbind USB devices
 ![](images/Screenshot_UnbindDevice.png)  

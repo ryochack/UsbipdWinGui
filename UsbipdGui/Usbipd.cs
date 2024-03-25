@@ -70,18 +70,25 @@ namespace UsbipdGui
             }
         }
 
+        public readonly string Version;
+
         public static Usbipd? BuildUsbIpdCommnad()
         {
-            if (IsExistsUsbipdCommand())
-            {
-                return new Usbipd();
-            }
-            else
+            if (!IsExistsUsbipdCommand())
             {
                 return null;
             }
+            string? version = ExecuteCommand("usbipd", "--version");
+            if (version is null)
+            {
+                return null;
+            }
+            return new Usbipd(version);
         }
-        private Usbipd() { }
+
+        private Usbipd(in string version) {
+            Version = version;
+        }
 
         public List<UsbDevice> GetUsbDevices()
         {

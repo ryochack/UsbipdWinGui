@@ -14,6 +14,8 @@ namespace UsbipdGui
     public partial class App : System.Windows.Application
     {
         private readonly string _appName = "UsbipdGui";
+        private readonly string _version = "1.0.0";
+
         // Resources
         private readonly System.Drawing.Icon _lightThemeIcon = new(
             GetResourceStream(new Uri("resource/usbip_lighttheme.ico", UriKind.Relative)).Stream);
@@ -255,6 +257,20 @@ namespace UsbipdGui
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private ToolStripMenuItem BuildAboutInfoItem()
+        {
+            ToolStripMenuItem item = new($"About {_appName}");
+            item.MouseUp += (sender, e) =>
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    OnLeftClickToShowAboutInfo(sender, e);
+                }
+            };
+            return item;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ToolStripMenuItem BuildExitItem()
         {
             ToolStripMenuItem item = new($"Exit");
@@ -377,6 +393,9 @@ namespace UsbipdGui
             // Settings Menu
             contextMenu.Items.Add(BuildSettingsItem());
 
+            // About Info Menu
+            contextMenu.Items.Add(BuildAboutInfoItem());
+
             // Exit item
             contextMenu.Items.Add(new ToolStripSeparator());
             contextMenu.Items.Add(BuildExitItem());
@@ -491,6 +510,28 @@ namespace UsbipdGui
                 }
             }
         }
+
+        private void OnLeftClickToShowAboutInfo(object? sender, EventArgs e)
+        {
+            Regex regex = SemVerRegex();
+            Match match = regex.Match(_usbipd?.Version ?? "");
+            string usbipd_win_version = (match.Success) ? match.Groups[0].Value : _usbipd?.Version ?? "";
+
+            System.Windows.Forms.MessageBox.Show(
+                $@"{_appName} version: {_version}
+https://github.com/ryochack/UsbipdWinGui
+
+usbipd-win version: {usbipd_win_version}
+https://github.com/dorssel/usbipd-win",
+                $"About {_appName}",
+                System.Windows.Forms.MessageBoxButtons.OK,
+                System.Windows.Forms.MessageBoxIcon.None);
+        }
+
+        // Regex target examples: "4.1.0"
+        [GeneratedRegex(@"^\d+\.\d+\.\d+")]
+        private static partial Regex SemVerRegex();
+
 
         private void OnLeftClickToExit(object? sender, EventArgs e)
         {

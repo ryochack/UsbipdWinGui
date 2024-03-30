@@ -18,13 +18,13 @@ namespace UsbipdGui
 
         // Resources
         private readonly System.Drawing.Icon _lightThemeIcon = new(
-            GetResourceStream(new Uri("resource/usbip_lighttheme.ico", UriKind.Relative)).Stream);
+            GetResourceStream(new Uri("resource/UsbipdSystemTrayLightTheme.ico", UriKind.Relative)).Stream);
         private readonly System.Drawing.Icon _darkThemeIcon = new(
-            GetResourceStream(new Uri("resource/usbip_darktheme.ico", UriKind.Relative)).Stream);
+            GetResourceStream(new Uri("resource/UsbipdSystemTrayDarkTheme.ico", UriKind.Relative)).Stream);
         private readonly System.Drawing.Image _bindIconImage = System.Drawing.Image.FromStream(
-            GetResourceStream(new Uri("resource/state_bind.ico", UriKind.Relative)).Stream);
+            GetResourceStream(new Uri("resource/StateBind.ico", UriKind.Relative)).Stream);
         private readonly System.Drawing.Image _attachIconImage = System.Drawing.Image.FromStream(
-            GetResourceStream(new Uri("resource/state_attach.ico", UriKind.Relative)).Stream);
+            GetResourceStream(new Uri("resource/StateAttach.ico", UriKind.Relative)).Stream);
 
         private Usbipd? _usbipd = null;
         Settings _settings = new();

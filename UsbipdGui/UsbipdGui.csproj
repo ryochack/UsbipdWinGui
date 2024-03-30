@@ -9,13 +9,15 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>resource\UsbipdGuiApp.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Resource Include="resource\state_attach.ico" />
-    <Resource Include="resource\state_bind.ico" />
-    <Resource Include="resource\usbip_darktheme.ico" />
-    <Resource Include="resource\usbip_lighttheme.ico" />
+    <Resource Include="resource\StateAttach.ico" />
+    <Resource Include="resource\StateBind.ico" />
+    <Resource Include="resource\UsbipdGuiApp.ico" />
+    <Resource Include="resource\UsbipdSystemTrayDarkTheme.ico" />
+    <Resource Include="resource\UsbipdSystemTrayLightTheme.ico" />
   </ItemGroup>
 
   <ItemGroup>

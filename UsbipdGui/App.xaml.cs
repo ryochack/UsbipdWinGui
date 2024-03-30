@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using Microsoft.Win32.TaskScheduler;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -15,6 +16,7 @@ namespace UsbipdGui
     {
         private readonly string _appName = "UsbipdGui";
         private readonly string _version = "1.0.0";
+        private readonly string? _exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
 
         // Resources
         private readonly System.Drawing.Icon _lightThemeIcon = new(
@@ -27,7 +29,8 @@ namespace UsbipdGui
             GetResourceStream(new Uri("resource/StateAttach.ico", UriKind.Relative)).Stream);
 
         private Usbipd? _usbipd = null;
-        Settings _settings = new();
+        private Settings _settings = new();
+        private bool _startupAtRun = false;
         private List<UsbDevice> _ignoredDeviceList = [];
         private System.Windows.Forms.NotifyIcon _notifyIcon = new();
         private System.Windows.Forms.ContextMenuStrip _contextMenu = new();
@@ -67,6 +70,8 @@ namespace UsbipdGui
 
             // Add system eventt handler to switch the theme of notify icon
             Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+
+            _startupAtRun = StartupSettings.IsRegistered(_appName);
         }
 
         private List<UsbDevice> LoadIgnoredUsbIdList()
@@ -242,7 +247,7 @@ namespace UsbipdGui
             {
                 ToolStripMenuItem startupItem = new("Run at startup")
                 {
-                    Checked = _settings.RunAtStartup,
+                    Checked = _startupAtRun,
                 };
                 startupItem.MouseUp += (sender, e) =>
                 {
@@ -434,34 +439,21 @@ namespace UsbipdGui
 
         private void OnLeftClickToToggleRunAtStartup(object? sender, EventArgs e)
         {
-            string appName = System.Diagnostics.Process.GetCurrentProcess().ProcessName ?? _appName;
-            string? appPath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
-            if (String.IsNullOrWhiteSpace(appPath))
+            if (String.IsNullOrWhiteSpace(_exePath))
             {
                 return;
             }
 
-            bool nextStateRunAtStartup = !_settings.RunAtStartup;
-
-            using RegistryKey? key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+            bool nextStateRunAtStartup = !_startupAtRun;
             if (nextStateRunAtStartup)
             {
-                // Add Application to Run registory to run at startup
-                key?.SetValue(appName, appPath);
+                StartupSettings.RegisterTask(_appName, _exePath);
             }
             else
             {
-                // Remove Application from Run registory
-                if (key?.GetValue(appName) is not null)
-                {
-                    key?.DeleteValue(appName);
-                }
+                StartupSettings.RemoveTask(_appName);
             }
-            Debug.WriteLine($"PATH={key} KEY={appName} VALUE={key?.GetValue(appName)}");
-            key?.Close();
-
-            _settings.RunAtStartup = nextStateRunAtStartup;
-            _settings.Save();
+            _startupAtRun = StartupSettings.IsRegistered(_appName);
         }
 
         private void OnLeftClickToBindDevice(object? sender, EventArgs e)

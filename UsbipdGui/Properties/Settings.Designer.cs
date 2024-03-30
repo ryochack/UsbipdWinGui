@@ -33,17 +33,5 @@ namespace UsbipdGui.Properties {
                 this["IgnoredUsbIds"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool RunAtStartup {
-            get {
-                return ((bool)(this["RunAtStartup"]));
-            }
-            set {
-                this["RunAtStartup"] = value;
-            }
-        }
     }
 }

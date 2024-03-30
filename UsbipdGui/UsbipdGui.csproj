@@ -13,6 +13,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="TaskScheduler" Version="2.10.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="resource\StateAttach.ico" />
     <Resource Include="resource\StateBind.ico" />
     <Resource Include="resource\UsbipdGuiApp.ico" />

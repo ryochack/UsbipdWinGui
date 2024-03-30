@@ -1,8 +1,8 @@
 ![](images/UsbipdGuiIcon.png)
 
 # UsbipdGui: USBIP GUI for Windows
-This application is a GUI wrapper for [dorssel/usbipd-win](https://github.com/dorssel/usbipd-win) that is a awesome USB/IP service for Windows.  
-UsbipdGui is simple, runs only on the system tray.
+This application is a GUI wrapper for [dorssel/usbipd-win](https://github.com/dorssel/usbipd-win) that is the awesome USB/IP service for Windows.  
+UsbipdGui is simple, runs only on a system tray.
 
 ![](images/Screenshot_SystemTrayIcon.png)
 
@@ -11,7 +11,7 @@ Before using this application, the usbipd-win must be set up according to "[Conn
 
 ## Features
 ![](images/Screenshot_ContextMenuOpen.png)  
-UsbipdGui provides the following features to make sharing USB devices easier with just a mouse operation.
+UsbipdGui provides the following features to make sharing USB devices easier with just mouse operations.
 
 - Display connected USB devices
 - Bind/Unbind connected USB devices

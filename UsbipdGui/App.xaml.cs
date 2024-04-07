@@ -15,7 +15,7 @@ namespace UsbipdGui
     public partial class App : System.Windows.Application
     {
         private readonly string _appName = "UsbipdGui";
-        private readonly string _version = "1.0.0";
+        private readonly string _version = "1.0.1";
         private readonly string? _exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
 
         // Resources

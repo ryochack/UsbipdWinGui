@@ -1,5 +1,5 @@
 ﻿using Microsoft.Win32;
-using Microsoft.Win32.TaskScheduler;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -99,7 +99,14 @@ namespace UsbipdGui
 
         private void SaveIgnoredUsbIdList(in List<UsbDevice> usbDevices)
         {
-            _settings.IgnoredUsbIds.Clear();
+            if (_settings.IgnoredUsbIds is null)
+            {
+                _settings.IgnoredUsbIds = new StringCollection();
+            }
+            else
+            {
+                _settings.IgnoredUsbIds.Clear();
+            }
             _settings.IgnoredUsbIds.AddRange(usbDevices.Select(dev => $"{dev.Vid}:{dev.Pid}").ToArray());
             _settings.Save();
         }
